@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script>
+
+const pages = [
+"https://app.onupkeep.com/web/analytics/dashboard/23693",
+"https://app.onupkeep.com/web/analytics/dashboard/23710",
+"https://app.onupkeep.com/web/analytics/dashboard/23711",
+"https://app.onupkeep.com/web/analytics/dashboard/23715",
+"https://app.onupkeep.com/web/analytics/dashboard/23826",
+"https://app.onupkeep.com/web/analytics/dashboard/23674",
+"https://app.onupkeep.com/web/analytics/dashboard/24412"
+];
+
+let index = 0;
+
+function rotate() {
+    window.location.href = pages[index];
+    index = (index + 1) % pages.length;
+}
+
+setInterval(rotate, 300000);
+setInterval(() => location.reload(), 5000);
+
+</script>
+</head>
+<body></body>
+</html>
