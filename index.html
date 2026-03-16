@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
+<title>Dashboard Rotation</title>
+
 <script>
 
 const pages = [
@@ -16,14 +18,25 @@ const pages = [
 let index = 0;
 
 function rotate() {
+    document.getElementById("status").innerText =
+        "Opening dashboard: " + pages[index];
+
     window.location.href = pages[index];
+
     index = (index + 1) % pages.length;
 }
 
-setInterval(rotate, 300000);
+setTimeout(rotate, 2000); // start after 2 seconds
 setInterval(() => location.reload(), 5000);
 
 </script>
+
 </head>
-<body></body>
+
+<body style="font-family:Arial;text-align:center;margin-top:100px">
+
+<h1>Dashboard Rotation Starting...</h1>
+<p id="status">Loading first dashboard...</p>
+
+</body>
 </html>
