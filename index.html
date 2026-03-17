@@ -15,28 +15,31 @@ const pages = [
 "https://app.onupkeep.com/web/analytics/dashboard/24412"
 ];
 
-let index = 0;
+// store index in browser so it survives page changes
+let index = localStorage.getItem("rotationIndex") || 0;
+index = parseInt(index);
 
-function rotate() {
-    document.getElementById("status").innerText =
-        "Opening dashboard: " + pages[index];
+// save next index BEFORE leaving
+let nextIndex = (index + 1) % pages.length;
+localStorage.setItem("rotationIndex", nextIndex);
 
+// schedule next rotation BEFORE navigating away
+setTimeout(() => {
+    window.location.href = window.location.origin;
+}, 300000); // 5 minutes
+
+// force refresh every 60 seconds
+setInterval(() => location.reload(), 60000);
+
+// go to dashboard
+setTimeout(() => {
     window.location.href = pages[index];
-
-    index = (index + 1) % pages.length;
-}
-
-setTimeout(rotate, 2000); // start after 2 seconds
-setInterval(() => location.reload(), 5000);
+}, 2000);
 
 </script>
 
 </head>
-
-<body style="font-family:Arial;text-align:center;margin-top:100px">
-
-<h1>Dashboard Rotation Starting...</h1>
-<p id="status">Loading first dashboard...</p>
-
+<body>
+<h2 style="text-align:center;margin-top:100px;">Starting Dashboard Rotation...</h2>
 </body>
 </html>
