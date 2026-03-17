@@ -4,7 +4,6 @@
 <title>Dashboard Rotation</title>
 
 <script>
-
 const pages = [
 "https://app.onupkeep.com/web/analytics/dashboard/23693",
 "https://app.onupkeep.com/web/analytics/dashboard/23710",
@@ -15,31 +14,59 @@ const pages = [
 "https://app.onupkeep.com/web/analytics/dashboard/24412"
 ];
 
-// store index in browser so it survives page changes
-let index = localStorage.getItem("rotationIndex") || 0;
-index = parseInt(index);
+let index = 0;
+let duration = 300; // 5 minutes
+let refreshInterval = 60;
 
-// save next index BEFORE leaving
-let nextIndex = (index + 1) % pages.length;
-localStorage.setItem("rotationIndex", nextIndex);
-
-// schedule next rotation BEFORE navigating away
-setTimeout(() => {
-    window.location.href = window.location.origin;
-}, 300000); // 5 minutes
-
-// force refresh every 60 seconds
-setInterval(() => location.reload(), 60000);
-
-// go to dashboard
-setTimeout(() => {
+function goToNext() {
+    localStorage.setItem("index", index);
     window.location.href = pages[index];
-}, 2000);
+}
+
+function startRotation() {
+    index = parseInt(localStorage.getItem("index")) || 0;
+
+    // show timer
+    let timeLeft = duration;
+
+    setInterval(() => {
+        timeLeft--;
+        document.getElementById("timer").innerText =
+            "Next in: " + timeLeft + "s";
+
+        if (timeLeft <= 0) {
+            index = (index + 1) % pages.length;
+            localStorage.setItem("index", index);
+            window.location.href = pages[index];
+        }
+    }, 1000);
+
+    // refresh page every X seconds
+    setInterval(() => {
+        location.reload();
+    }, refreshInterval * 1000);
+}
+
+// Start after slight delay (important for FireStick)
+setTimeout(goToNext, 3000);
 
 </script>
 
 </head>
-<body>
-<h2 style="text-align:center;margin-top:100px;">Starting Dashboard Rotation...</h2>
+
+<body onload="startRotation()" style="margin:0">
+
+<div id="timer" style="
+position:fixed;
+bottom:10px;
+left:10px;
+background:black;
+color:white;
+padding:10px;
+font-size:20px;
+z-index:9999;">
+Starting...
+</div>
+
 </body>
 </html>
