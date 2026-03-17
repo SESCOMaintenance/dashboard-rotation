@@ -1,72 +1,90 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
 <head>
-<title>Dashboard Rotation</title>
+<style type="text/css">
+body { margin:0; padding:0; }
+iframe { height: 100%; width:100%; }
+</style>
+<script src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"/>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+</head>
+<body>
+<iframe id="f" src="#" frameborder="0" style="overflow:hidden;overflow-x:hidden;overflow-y:hidden;height:100%;width:100%;position:absolute;top:0px;left:0px;right:0px;bottom:0px;" height="100%" width="100%">></iframe>
+<div id="praetorian"
+  style="cursor:pointer;font-family:serif,Times;position:absolute;bottom:0px;right:0px;width:30px;height:24px;z-index:2;filter: invert(100%);"
+  data-toggle="modal" data-target="#config">&pi;</div>
 
+<!-- modal for config -->
+<div id="config" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Configure</h4>
+      </div>
+      <div class="modal-body">
+        <h5>URLs</h5>
+        <div id="urls"></div>
+        <button id="add" class="pull-right btn btn-success">+ Add URL</button>
+        <h5>Refresh Interval</h5>
+        <div class="form-inline"><input id="interval" class="form-control" type="text" size="10"> ms</div>
+      </div>
+      <div class="modal-footer">
+        <button id="close" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 <script>
-const pages = [
-"https://app.onupkeep.com/web/analytics/dashboard/23693",
-"https://app.onupkeep.com/web/analytics/dashboard/23710",
-"https://app.onupkeep.com/web/analytics/dashboard/23711",
-"https://app.onupkeep.com/web/analytics/dashboard/23715",
-"https://app.onupkeep.com/web/analytics/dashboard/23826",
-"https://app.onupkeep.com/web/analytics/dashboard/23674",
-"https://app.onupkeep.com/web/analytics/dashboard/24412"
-];
+var config = {
+  "urls": [
+    "http://sajacy.github.io/tv-dashboard"
+  ], 
+  "refresh_interval": 3*60*1000 // 3 mins
+};
 
-let index = 0;
-let duration = 300; // 5 minutes
-let refreshInterval = 60;
+(function(config) {
+  var urls = config.urls.map(function(s) { return s; }); //clone array
+  var refresh_interval = config.refresh_interval;
+  var render = function() { while(urls[0].length === 0) { next(); } $("#f").attr("src", urls[0]); renderConfig(); };
+  var next = function() { urls.push(urls.shift()); };
+  var prev = function() { urls.unshift(urls.pop()); };
+  var timer = null;
+  var resetTimer = function(off) {
+    clearInterval(timer);
+    console.log("Cleared timer");
+    if(!off) {
+      timer = setInterval(function() { next(); render(); }, refresh_interval);
+      console.log("set new timer");
+    }
+  }
 
-function goToNext() {
-    localStorage.setItem("index", index);
-    window.location.href = pages[index];
-}
+  var renderConfig = function() {
+    $("#urls").empty();
+    urls.forEach(function(url,i) { 
+      var row = $('<div class="form-group"><div class="input-group"><input class="form-control"/><div class="input-group-addon"><a class="glyphicon glyphicon-remove"></a></div></div></div>');
+      $("input", row).val(url).on("change", function(e) { urls[i] = $(this).val(); });
+      $("a", row).click(function(e) { urls.splice(i,1); renderConfig(); });
+      row.appendTo("#urls");
+    });
+    $("#interval").val(refresh_interval);
+  };
 
-function startRotation() {
-    index = parseInt(localStorage.getItem("index")) || 0;
+  document.body.addEventListener("keydown", function(e) {
+    if (e.keyCode == 37) { console.log("Prev"); resetTimer(); prev(); render(); }
+    if (e.keyCode == 38) { console.log("Unpin"); resetTimer(); }
+    if (e.keyCode == 39) { console.log("Next"); resetTimer(); next(); render(); }
+    if (e.keyCode == 40) { console.log("Pin"); resetTimer(true); }
+  });
 
-    // show timer
-    let timeLeft = duration;
+  $("#praetorian").on("click", renderConfig);
+  $("#add").on("click", function(e) { urls.push(""); renderConfig(); });
 
-    setInterval(() => {
-        timeLeft--;
-        document.getElementById("timer").innerText =
-            "Next in: " + timeLeft + "s";
-
-        if (timeLeft <= 0) {
-            index = (index + 1) % pages.length;
-            localStorage.setItem("index", index);
-            window.location.href = pages[index];
-        }
-    }, 1000);
-
-    // refresh page every X seconds
-    setInterval(() => {
-        location.reload();
-    }, refreshInterval * 1000);
-}
-
-// Start after slight delay (important for FireStick)
-setTimeout(goToNext, 3000);
+  render();
+  resetTimer();
+})(config);
 
 </script>
-
-</head>
-
-<body onload="startRotation()" style="margin:0">
-
-<div id="timer" style="
-position:fixed;
-bottom:10px;
-left:10px;
-background:black;
-color:white;
-padding:10px;
-font-size:20px;
-z-index:9999;">
-Starting...
-</div>
-
 </body>
 </html>
